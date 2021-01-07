@@ -1,4 +1,4 @@
-# Data-acquisition-for-ML
+# Data acquisition for improving Machine Learning models
 
 The repository is being updated.
 
