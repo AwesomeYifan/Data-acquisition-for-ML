@@ -12,13 +12,15 @@ Each sub-folder correspondes to an initialization configuration (e.g., different
 
 ## To reproduce the results:
 
-For Crop and RoadNet, directly run the corresponding test file. As an example, if you run the code corresponding Crop with u=1, the final output (model accuracy) can be located at Crop/1/results. For CIFAR10 and CIFAR100, first run the test file, and a ABC.csv file with the ids of the acquired images will be produced; then run the train_VGG.py with the following command:
+For Crop and RoadNet, directly run the corresponding test file. As an example, if you run the code corresponding Crop with u=1, the final output (model accuracy) can be located at Crop/1/results. For CIFAR10 and CIFAR100, first run the test file, and a ABC.csv file with the ids of the acquired images will be produced; then run the `train_VGG.py` with the following command:
 
 ```
 python3 train.py --dataset CIFAR10 --path_to_folder 'DIR_OF_THE_ABC.csv_FILE' --file_name 'ABC.csv'
 ```
 
- And the output can be located in 'DIR_OF_THE_ABC.csv_FILE/results/' (so be sure there is a results folder).
+And the output can be located in 'DIR_OF_THE_ABC.csv_FILE/results/' (so be sure there is a results folder).
+
+Note before run `train_VGG.py`, you need to download the original CIFAR dataset here (https://www.cs.toronto.edu/~kriz/cifar.html). Say the path the of the downloaded datasets is `/A/B/CIFAR10`, replace `drive/My Drive/marketplace/data/CIFAR10` in `train_VGG.py` with `/A/B/CIFAR10`.
 
 If you need to modify some parameters (e.g., batch size, value of l, value of tau), you can direcly do it in the test_METHODNAME_DATASETNAME.py file. The names of these variables are consistent with the ones used in the paper.
 
