@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.testing._private.utils import measure
 from sklearn.metrics import pairwise_distances
 from TS import TS
 from sklearn.neighbors import KNeighborsClassifier
@@ -10,8 +11,9 @@ from sklearn.model_selection import KFold
 import math
 import Utils
 import random
+import Measure
 class SPS_Buyer:
-    def __init__(self, budget, n_regions, all_features, rawX, rawY, init_sample_ids, model, seller):
+    def __init__(self, budget, n_regions, all_features, rawX, rawY, init_sample_ids, seller, model=0):
         self.partition_by_class = True
         self.budget = budget
         self.n_regions = n_regions
@@ -47,8 +49,8 @@ class SPS_Buyer:
             if self.retrain_enabled:
                 self.retrain()
         while len(self.purchased_ids) < self.budget:
-            # self.check_utility()
-            # print("*************************")
+            self.check_utility()
+            print("*************************")
             region_id = self.t_sampler.next()
             sample_ids = self.seller.get_samples_of_region_id(region_id, self.batch_size)
             print(len(self.purchased_ids))
@@ -147,7 +149,6 @@ class SPS_Buyer:
 
     def compute_novelty(self, record_ids, label):
         old_vectors = self.get_acquired_vectors(label)
-        old_labels = [1]*len(old_vectors)
         new_vectors = self.all_features[record_ids]
         if not self.partition_by_class:
             new_vectors = []
@@ -155,44 +156,9 @@ class SPS_Buyer:
                 temp = self.all_features[record_id].tolist()
                 temp.append(self.rawY[record_id])
                 new_vectors.append(temp)
-        new_labels = [0]*len(new_vectors)
-        new_X_train = new_vectors
-        new_X_test = new_vectors
-        new_y_train = new_labels
-        new_y_test = new_labels
-        X = list(new_X_train)
-        X.extend(list(old_vectors))
-        y = list(new_y_train)
-        y.extend(list(old_labels))
-        clf = KNeighborsClassifier(n_neighbors=3).fit(X, y)
-        acc = clf.score(new_X_test, new_y_test)
+        acc = Measure.compute_novelty(old_vectors, new_vectors)
         return acc
    
-    # def compute_novelty(self, record_ids, label):
-    #     old_vectors = self.get_acquired_vectors(label)
-    #     old_labels = [1]*len(old_vectors)
-    #     new_vectors = self.all_features[record_ids]
-    #     if not self.partition_by_class:
-    #         new_vectors = []
-    #         for record_id in record_ids:
-    #             temp = self.all_features[record_id].copy().append(self.rawY[record_id])
-    #             new_vectors.append(temp)
-    #     new_labels = [0]*len(new_vectors)
-    #     n_splits = 5
-    #     sum_acc = 0
-    #     kf = KFold(n_splits=n_splits)
-    #     for train_index, test_index in kf.split(new_vectors):
-    #         new_X_train, new_y_train = [new_vectors[i] for i in train_index], [new_labels[i] for i in train_index]
-    #         new_X_test, new_y_test = [new_vectors[i] for i in test_index], [new_labels[i] for i in test_index]
-    #         X = new_X_train.copy()
-    #         X.extend(list(old_vectors))
-    #         y = new_y_train.copy()
-    #         y.extend(list(old_labels))
-    #         clf = KNeighborsClassifier(n_neighbors=1).fit(X, y)
-    #         acc = clf.score(new_X_test, new_y_test)
-    #         sum_acc += acc
-    #     return sum_acc / n_splits
-    
     def compute_proxy_dist(self, record_ids, label):
         old_vectors = self.get_acquired_vectors(label)
         old_labels = [1]*len(old_vectors)

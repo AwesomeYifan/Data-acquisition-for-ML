@@ -13,9 +13,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 import math
 import Utils
+import Measure
 import random
-class Statistical_Buyer:
-    def __init__(self, budget, n_predicates, all_features, rawX, rawY, init_record_ids, model, seller):
+
+class EA_Buyer:
+    def __init__(self, budget, n_predicates, all_features, rawX, rawY, init_record_ids, seller, true_utilities=None):
         self.partition_by_class = True
         self.budget = budget
         self.remaining_budget = budget
@@ -24,7 +26,7 @@ class Statistical_Buyer:
         self.rawX = rawX
         self.rawY = rawY
         self.init_record_ids = init_record_ids
-        self.model = model
+        self.true_utilities = true_utilities
         self.seller = seller
         self.acquired_record_ids_by_predicate = [[] for _ in range(n_predicates)]
         self.initial_vectors_by_class = []
@@ -38,7 +40,12 @@ class Statistical_Buyer:
         self.initial_vectors_by_class = self.get_init_vectors(self.rawY, self.init_record_ids)
         self.initialize()
         estimated_utilities = self.probe()
+        
         print("Budget consumption for eatimation: " + str(self.budget - self.remaining_budget))
+        if not self.true_utilities == None:
+            est_errors = [abs(estimated_utilities[i] - self.true_utilities[i]) for i in range(len(estimated_utilities))]
+            avg_est_error = sum(est_errors) / len(est_errors)
+            print("estimated error: " + str(avg_est_error))
         # for i in range(self.n_predicates):
         #     percentage = estimated_utilities[i] / sum(estimated_utilities)
         #     percentage = int(percentage * 100)/100
@@ -186,54 +193,15 @@ class Statistical_Buyer:
 
     def compute_utility(self, label):
         old_vectors = self.initial_vectors_by_class[label]
-        old_vectors = np.array(old_vectors)
-        old_labels = [1]*len(old_vectors)
         record_ids = self.acquired_record_ids_by_predicate[label]
         new_vectors = self.all_features[record_ids]
         if not self.partition_by_class:
             append_values = np.array([self.rawY[record_ids]]).T
             new_vectors = np.concatenate((new_vectors, append_values),axis=1)
-        new_labels = [0]*len(new_vectors)
-        new_X_train = new_vectors
-        new_X_test = new_vectors
-        new_y_train = new_labels
-        new_y_test = new_labels
-        X = list(new_X_train)
-        X.extend(list(old_vectors))
-        y = list(new_y_train)
-        y.extend(list(old_labels))
-        # X, X_test, y, y_test = train_test_split(X, y, stratify=y, random_state=1)
-        clf = KNeighborsClassifier(n_neighbors=3).fit(X, y)
-        # clf = MLPClassifier(random_state=1, max_iter=300).fit(X, y)
-        # clf = DecisionTreeClassifier().fit(X, y)
-        acc = clf.score(new_X_test, new_y_test)
+        acc = Measure.compute_novelty(old_vectors, new_vectors)
         return acc
-    # def compute_utility(self, label):
-    #     old_vectors = self.initial_vectors_by_class[label]
-    #     # old_vectors = np.array(old_vectors)
-    #     old_labels = [1]*len(old_vectors)
-    #     record_ids = self.acquired_record_ids_by_predicate[label]
-    #     new_vectors = self.all_features[record_ids]
-    #     if not self.partition_by_class:
-    #         new_vectors = []
-    #         for record_id in record_ids:
-    #             temp = self.all_features[record_id].copy().append(self.rawY[record_id])
-    #             new_vectors.append(temp)
-    #     new_labels = [0]*len(new_vectors)
-    #     n_splits = 5
-    #     sum_acc = 0
-    #     kf = KFold(n_splits=n_splits)
-    #     for train_index, test_index in kf.split(new_vectors):
-    #         new_X_train, new_y_train = [new_vectors[i] for i in train_index], [new_labels[i] for i in train_index]
-    #         new_X_test, new_y_test = [new_vectors[i] for i in test_index], [new_labels[i] for i in test_index]
-    #         X = new_X_train.copy()
-    #         X.extend(list(old_vectors))
-    #         y = new_y_train.copy()
-    #         y.extend(list(old_labels))
-    #         clf = KNeighborsClassifier(n_neighbors=1).fit(X, y)
-    #         acc = clf.score(new_X_test, new_y_test)
-    #         sum_acc += acc
-    #     return sum_acc / n_splits
+    
+    
     
     def chenge_to_regression(self):
         self.partition_by_class = False
