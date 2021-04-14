@@ -16,7 +16,7 @@ init_image_ids = [int(v) for v in init_image_ids]
 
 model = CModel()
 model.fit(trainX[init_image_ids], trainY[init_image_ids])
-seller = Seller(n_classes, trainX, trainY)
+seller = Seller(n_classes, trainX, trainY, init_image_ids)
 budget = 100001
 for sz in [100]:
     # data acquisition

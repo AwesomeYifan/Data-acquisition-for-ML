@@ -18,7 +18,7 @@ init_image_ids = [int(v) for v in init_image_ids]
 
 all_budgets = list(range(2000,300000,2000))
 alloc_strat = 'Linear'
-seller = Seller(n_regions, trainX, trainY, False)
+seller = Seller(n_regions, trainX, trainY, init_image_ids, False)
 
 for l in [0.001]:
     # data acquisition

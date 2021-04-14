@@ -15,7 +15,7 @@ u = 5
 init_image_ids = np.loadtxt("./Crop/" + str(u) + "/init.csv")
 init_image_ids = [int(v) for v in init_image_ids]
 
-seller = Seller(n_regions, trainX, trainY)
+seller = Seller(n_regions, trainX, trainY, init_image_ids)
 
 all_budgets = list(range(2000,100001,5000))
 

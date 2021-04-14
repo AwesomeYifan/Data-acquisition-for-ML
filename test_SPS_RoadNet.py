@@ -16,7 +16,7 @@ folder = "roadnet/roadnet" + str(n_regions) + "/"
 init_sample_ids = np.loadtxt(folder + str(u) + "/init.csv")
 init_sample_ids = [int(v) for v in init_sample_ids]
 
-seller = Seller(n_regions, trainX, trainY, False)
+seller = Seller(n_regions, trainX, trainY, init_sample_ids, False)
 budget = 20000
 for sz in [31]:
     # data acquisition

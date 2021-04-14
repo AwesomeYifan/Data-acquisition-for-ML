@@ -21,7 +21,7 @@ init_image_ids = [int(v) for v in init_image_ids]
 total_budget = 100001
 budget_list = list(np.arange(2000,100001,5000))
 
-seller = Seller(n_classes, trainX, trainY)
+seller = Seller(n_classes, trainX, trainY, init_image_ids)
 # purchase step
 for _ in range(10):
     seller.reset()
